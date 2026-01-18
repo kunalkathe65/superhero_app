@@ -1,16 +1,21 @@
-from fastapi import APIRouter, Depends, Response, status, HTTPException
+from fastapi import APIRouter, Depends, Response, status, HTTPException, Header
 from src.schemas.user import LoginReq, RegisterReq, CreateTeam
 from src.services.user import UserService
 from src.services.team import TeamService
 from src.dependencies.user import get_user_service
 from src.dependencies.team import get_team_service
+from src.dependencies.verify_token import verify_token
 from src.core.user_exceptions import UserNotFound, InvalidPassword, UserAlreadyExists
 from src.core.team_exceptions import TeamAlreadyExists, TeamNotFound
 
 router = APIRouter(prefix="/api/v1/user", tags=["users"])
 
 @router.post("/login")
-def login_user(req: LoginReq, res: Response, service: UserService = Depends(get_user_service)):
+def login_user(
+    req: LoginReq, 
+    res: Response, 
+    service: UserService = Depends(get_user_service)
+    ):
     try:
         token = service.login_user(req)
         if token:
@@ -44,9 +49,14 @@ def register_user(req: RegisterReq, service: UserService = Depends(get_user_serv
         )
 
 @router.post("/create-team")
-def create_team(req: CreateTeam, service: TeamService = Depends(get_team_service)):
+def create_team(
+    req: CreateTeam, 
+    service: TeamService = Depends(get_team_service),
+    token: str = Header(..., description="Bearer token"),
+    user = Depends(verify_token)
+    ):
     try:
-        team = service.create_team(req)
+        team = service.create_team(user.user_id)
         if team:
             return {"message": "Team created successfully"}
     except TeamAlreadyExists:

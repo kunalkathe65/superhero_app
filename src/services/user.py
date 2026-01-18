@@ -10,20 +10,13 @@ class UserService:
             raise UserNotFound()
         if user_does_exist.password_hash != data.password:
             raise InvalidPassword()
-        return "token"
+        return user_does_exist.user_id
 
-    
     def register_user(self, data):
         user_does_exist = self.repo.get_by_email(data.email)
         if user_does_exist:
             raise UserAlreadyExists()
         return self.repo.create(data)
-    
-    def create_team(self, data):
-        return self.repo.create_team(data)
-    
-    def get_user_teams(self, data):
-        return self.repo.get_user_teams(data)
     
     def assign_fav_superhero(self, data):
         return self.repo.assign_fav_superhero(data)
