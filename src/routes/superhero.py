@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from src.schemas.superhero import UpdateSuperheroReq
 
 router = APIRouter(prefix="/api/v1/superhero", tags=["superheroes"])
 
@@ -11,5 +12,5 @@ def get_superhero_details():
     pass
 
 @router.patch("/update/{superhero_id}")
-def update_superhero_details():
+def update_superhero_details(req: UpdateSuperheroReq):
     pass
