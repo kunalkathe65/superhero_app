@@ -1,6 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-
+from typing import Optional, List
 class LoginReq(BaseModel):
     email: EmailStr
     password: str
@@ -11,4 +10,5 @@ class RegisterReq(BaseModel):
     role: Optional[int] = 0
 
 class CreateTeam(BaseModel):
-    team_name: str
+    name: str
+    member_superheroes: List[int]

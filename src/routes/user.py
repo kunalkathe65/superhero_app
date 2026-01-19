@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, Response, status, HTTPException
 from src.schemas.user import LoginReq, RegisterReq, CreateTeam
 from src.services.user import UserService
+from src.services.team import TeamService
 from src.dependencies.user import get_user_service
+from src.dependencies.team import get_team_service
 from src.core.user_exceptions import UserNotFound, InvalidPassword, UserAlreadyExists
+from src.core.team_exceptions import TeamAlreadyExists, TeamNotFound
 
 router = APIRouter(prefix="/api/v1/user", tags=["users"])
 
@@ -41,12 +44,29 @@ def register_user(req: RegisterReq, service: UserService = Depends(get_user_serv
         )
 
 @router.post("/create-team")
-def create_team(req: CreateTeam, service: UserService = Depends(get_user_service)):
-    pass
+def create_team(req: CreateTeam, service: TeamService = Depends(get_team_service)):
+    try:
+        team = service.create_team(req)
+        if team:
+            return {"message": "Team created successfully"}
+    except TeamAlreadyExists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Team with same name already exists"
+        )
 
 @router.get("/get/teams")
-def get_user_teams(service: UserService = Depends(get_user_service)):
-    pass
+def get_user_teams(req, service: TeamService = Depends(get_team_service)):
+    try:
+        teams = service.get_user_teams(req)
+        if teams:
+            return {"teams": teams}
+    except TeamNotFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="You have not formed any team"
+        )
+
 
 @router.post("/assign-fav/{superhero_id}")
 def assign_fav_superhero(service: UserService = Depends(get_user_service)):
