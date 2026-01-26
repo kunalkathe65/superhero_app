@@ -12,11 +12,11 @@ member_superheroes = Table(
 class Team(Base):
     __tablename__ = "teams"
 
-    team_id = Column(Integer, primary_key=True, index=True)
+    team_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, nullable=False)
     name = Column(Text, nullable=False)
     member_superheroes = relationship(
-        "member_superheroes",
+        "Superhero",
         secondary=member_superheroes,
         back_populates="teams"
     )

@@ -9,3 +9,12 @@ class InvalidPassword(AuthError):
 
 class UserAlreadyExists(AuthError):
     pass
+
+class SuperheroAlreadyFavourite(AuthError):
+    pass
+
+class NoFavSuperheroesFound(AuthError):
+    pass
+
+class NotAuthorized(AuthError):
+    pass

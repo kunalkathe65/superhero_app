@@ -28,7 +28,7 @@ class SuperheroSeeder:
                     conn.execute(
                         text("""
                             INSERT INTO superheroes (
-                                id,
+                                superhero_id,
                                 name,
                                 powerstats,
                                 biography,
@@ -37,7 +37,7 @@ class SuperheroSeeder:
                                 connections,
                                 image_url
                             ) VALUES (
-                                :id,
+                                :superhero_id,
                                 :name,
                                 :powerstats,
                                 :biography,
@@ -46,10 +46,10 @@ class SuperheroSeeder:
                                 :connections,
                                 :image_url
                             )
-                            ON CONFLICT (id) DO NOTHING
+                            ON CONFLICT (superhero_id) DO NOTHING
                         """),
                         {
-                            "id": superhero_id,
+                            "superhero_id": superhero_id,
                             "name": json.dumps(superhero["name"]),
                             "powerstats": json.dumps(superhero["powerstats"]),
                             "biography": json.dumps(superhero["biography"]),

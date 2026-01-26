@@ -5,7 +5,7 @@ from src.services.team import TeamService
 from src.dependencies.user import get_user_service
 from src.dependencies.team import get_team_service
 from src.dependencies.verify_token import verify_token
-from src.core.user_exceptions import UserNotFound, InvalidPassword, UserAlreadyExists
+from src.core.user_exceptions import UserNotFound, InvalidPassword, UserAlreadyExists, NoFavSuperheroesFound, SuperheroAlreadyFavourite
 from src.core.team_exceptions import TeamAlreadyExists, TeamNotFound
 
 router = APIRouter(prefix="/api/v1/user", tags=["users"])
@@ -56,7 +56,7 @@ def create_team(
     user = Depends(verify_token)
     ):
     try:
-        team = service.create_team(user.user_id)
+        team = service.create_team(req, user.user_id)
         if team:
             return {"message": "Team created successfully"}
     except TeamAlreadyExists:
@@ -66,9 +66,13 @@ def create_team(
         )
 
 @router.get("/get/teams")
-def get_user_teams(req, service: TeamService = Depends(get_team_service)):
+def get_user_teams(
+    service: TeamService = Depends(get_team_service),
+    token: str = Header(..., description="Bearer token"),
+    user = Depends(verify_token)
+    ):
     try:
-        teams = service.get_user_teams(req)
+        teams = service.get_user_teams(user.user_id)
         if teams:
             return {"teams": teams}
     except TeamNotFound:
@@ -77,11 +81,35 @@ def get_user_teams(req, service: TeamService = Depends(get_team_service)):
             detail="You have not formed any team"
         )
 
-
 @router.post("/assign-fav/{superhero_id}")
-def assign_fav_superhero(service: UserService = Depends(get_user_service)):
-    pass
+def assign_fav_superhero(
+    superhero_id: int,
+    service: UserService = Depends(get_user_service),
+    token: str = Header(..., description="Bearer token"),
+    user = Depends(verify_token)
+    ):
+    try:
+        response = service.assign_fav_superhero(superhero_id, user.user_id)
+        if response:
+            return {"message": "Superhero successfully assigned as favourite"}
+    except SuperheroAlreadyFavourite:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Superhero is already assigned as favourite"
+        )
 
 @router.get("/get/fav-superheroes")
-def get_fav_superheroes(service: UserService = Depends(get_user_service)):
-    pass
+def get_fav_superheroes(
+    service: UserService = Depends(get_user_service),
+    token: str = Header(..., description="Bearer token"),
+    user = Depends(verify_token)
+    ):
+    try:
+        fav_superheroes = service.get_fav_superheroes(user.user_id)
+        if fav_superheroes:
+            return {"fav_superheroes": fav_superheroes}
+    except NoFavSuperheroesFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No favourite Superhero found"
+        )
